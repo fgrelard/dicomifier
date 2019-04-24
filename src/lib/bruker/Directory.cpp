@@ -36,15 +36,19 @@ Directory
 ::list_subjects(std::string const & path)
 {
     std::vector<std::string> subjects;
-    typedef boost::filesystem::recursive_directory_iterator RecursiveIterator;
+    // typedef boost::filesystem::recursive_directory_iterator RecursiveIterator;
+    // int i = 0;
+    // for (RecursiveIterator it(path); it != RecursiveIterator(); ++it)
+    // {
 
-    for (RecursiveIterator it(path); it != RecursiveIterator(); ++it)
-    {
-        if (it->path().filename() == "subject")
-        {
-            subjects.push_back(it->path().parent_path().string());
-        }
-    }
+    //     if (it->path().filename() == "50")
+    //     {
+    //         std::cout << i << std::endl;
+
+    //     }
+    //     i++;
+    // }
+    subjects.push_back(path);
     return subjects;
 }
 
