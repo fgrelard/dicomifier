@@ -41,13 +41,13 @@ Directory
     // for (RecursiveIterator it(path); it != RecursiveIterator(); ++it)
     // {
 
-    //     if (it->path().filename() == "50")
+    //     if (it->path().filename() == "7")
     //     {
-    //         std::cout << i << std::endl;
-
+    //         subjects.push_back(it->path().parent_path().string());
     //     }
     //     i++;
     // }
+    // std::cout << path << std::endl;
     subjects.push_back(path);
     return subjects;
 }
