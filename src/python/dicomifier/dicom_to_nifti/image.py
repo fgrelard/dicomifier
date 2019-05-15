@@ -111,7 +111,11 @@ def get_image(data_sets_frame_idx, dtype, cache):
 
     elif samples_per_pix == 3 and data_sets_frame_idx[0][0].as_string("PhotometricInterpretation")[0] == b"RGB":
         if dtype != numpy.uint8:
-            raise Exception("Invalid dtype {} for RGB".format(dtype))
+            logger.warning("Invalid dtype {} for RGB, re-sampling".format(dtype))
+            min = pixel_data[...,].min((0,1,2))
+            max = pixel_data[...,].max((0,1,2))
+            pixel_data = ((pixel_data-min)/(max-min)*255).round().astype(numpy.uint8)
+            dtype = numpy.uint8
         pixel_data = pixel_data.view(
                 nibabel.nifti1.data_type_codes.dtype["RGB"]
             ).reshape(pixel_data.shape[:3])
@@ -155,6 +159,12 @@ def get_shaped_pixel_data(data_set, linear_pixel_data, frame_idx):
     
     rows = data_set.as_int(odil.registry.Rows)[0]
     cols = data_set.as_int(odil.registry.Columns)[0]
+    
+    def reshape(array, shape):
+        try:
+            return array.reshape(shape)
+        except ValueError:
+            return array[:-1].reshape(shape)
 
     samples_per_pixel = data_set.as_int(odil.registry.SamplesPerPixel)[0]
     if samples_per_pixel == 1:
@@ -162,12 +172,12 @@ def get_shaped_pixel_data(data_set, linear_pixel_data, frame_idx):
                 data_set.has(odil.registry.PerFrameFunctionalGroupsSequence) 
                 and data_set.has(odil.registry.NumberOfFrames)):
             number_of_frames = data_set.as_int(odil.registry.NumberOfFrames)[0]
-            pixel_data = linear_pixel_data.reshape(number_of_frames, rows, cols)
+            pixel_data = reshape(linear_pixel_data, (number_of_frames, rows, cols))
             pixel_data = pixel_data[frame_idx, :]
         else:
-            pixel_data = linear_pixel_data.reshape(rows, cols)
+            pixel_data = reshape(linear_pixel_data, (rows, cols))
     else:
-        pixel_data = linear_pixel_data.reshape(rows, cols, samples_per_pixel)
+        pixel_data = reshape(linear_pixel_data, (rows, cols, samples_per_pixel))
 
     # Mask the data using Bits Stored, cf. PS 3.5, 8.1.1
     bits_stored = data_set.as_int(odil.registry.BitsStored)[0]
